@@ -28,45 +28,45 @@ class DoublyLinkedList:
             self.head.prev = new_node
             self.head = new_node  # новый элемент становится начальным
 
-    def delete(self, data): # Удаление элемента из списка
-        current = self.head
-        while current:
-            if current.data == data:
-                if current.prev:
-                    current.prev.next = current.next
-                else:
-                    self.head = current.next
-                if current.next:
-                    current.next.prev = current.prev
-                return
-            current = current.next
+   def delete(self, data):  # Метод для удаления элемента из списка
+        current = self.head  # Начинаем с начального
+        while current:  # Пока не достигнут конец списка
+            if current.data == data:  # Если значение текущего элемента соответствует искомому значению
+                if current.prev:  # Если у текущего элемента есть предыдущий
+                    current.prev.next = current.next  # Обновляем ссылку на следующий для предыдущего элемента
+                else:  # Иначе, если текущий элемент является начальным
+                    self.head = current.next  # Обновляем начальный элемент
+                if current.next:  # Если у текущего элемента есть следующий элемент
+                    current.next.prev = current.prev  # Обновляем ссылку на предыдущий элемент для следующего
+                return  # Возвращаемся после удаления элемента
+            current = current.next  # Переходим к следующему элементу
 
-    def display_from_beginning(self):  #создает список элементов, начиная с начального.
-        elements = []
+    def display_from_beginning(self):  # Метод для отображения элементов списка с начала
+        elements = [] # Создаем пустой список для элементов
         current = self.head
-        while current:
-            elements.append(current.data)
+        while current: # Пока не достигнут конец списка
+            elements.append(current.data) # Добавляем значение текущего узла в список элементов
             current = current.next
         print("Список с начала", elements)
 
-    def display_from_end(self): #создает список элементов, начиная с конечного.
-        elements = []
-        current = self.head
-        while current.next:
-            current = current.next
-        while current:
-            elements.append(current.data)
-            current = current.prev
-        print("Список с конца:", elements)
+    def display_from_end(self):  # Метод для отображения элементов списка с конца
+        elements = []  # Создаем пустой список для элементов
+        current = self.head  # Начинаем с начального элемента
+        while current.next:  # Пока не достигнут конец списка
+            current = current.next  # Переходим к следующему элементу, чтобы найти конец списка
+        while current:  # Итеративно проходим с конца к началу
+            elements.append(current.data)  # Добавляем значение текущего элемента в список элементов
+            current = current.prev  # Переходим к предыдущему элементу
+        print("List from end:", elements)  # Отображаем список элементов с конца
 
-    def find(self, data):
+    def find(self, data): # Метод для поиска элемента в списке
         index = 0
         current = self.head
         while current:
-            if current.data == data:
-                return f"Элемент, найденный по индексу {index}"
-            current = current.next
-            index += 1
+            if current.data == data: # Если значение текущего соответствует искомому значению
+                return f"Элемент, найденный по индексу {index}" # Возвращаем сообщение о найденном индексе
+            current = current.next # Переходим к следующему узлу
+            index += 1 # Увеличиваем индекс на 1
         return "Элемент не найден"
 
 
