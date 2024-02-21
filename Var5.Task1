@@ -1,0 +1,76 @@
+class Vector:
+    count = 0  # Статическая переменная для подсчета числа объектов типа Vector
+
+    def __init__(self, *args):
+        # Конструктор класса
+        if len(args) == 0:
+            self.arr = [0]  # Создание вектора из одного элемента, инициализированного нулем
+            self.size = 1  # Установка размера вектора
+        elif len(args) == 1:
+            self.arr = [args[0]] * args[0]  # Создание вектора из одинаковых элементов, инициализированных значением
+            self.size = args[0]  # Установка размера вектора
+        elif len(args) == 2:
+            self.arr = [args[1]] * args[0]  # Создание вектора из одинаковых элементов, инициализированных значением
+            self.size = args[0]  # Установка размера вектора
+        self.state = 0  # Переменная состояния, инициализированная нулем
+        Vector.count += 1  # Увеличение счетчика объектов типа Vector
+
+    def set(self, index, value=0):
+        # Функция, присваивающая значение элементу массива по указанному индексу
+        if index >= 0 and index < self.size:
+            self.arr[index] = value
+            self.state = 0  # Сброс кода ошибки
+        else:
+            self.state = 1  # Установка кода ошибки - выход за пределы массива
+
+    def get(self, index):
+        # Функция, возвращающая значение элемента массива по указанному индексу
+        if index >= 0 and index < self.size:
+            self.state = 0  # Сброс кода ошибки
+            return self.arr[index]
+        else:
+            self.state = 1  # Установка кода ошибки - выход за пределы массива
+            return None
+
+    def print(self):
+        # Функция печати элементов массива
+        print(self.arr)
+
+    def add(self, value):
+        # Функция сложения каждого элемента массива с указанным значением
+        self.arr = [x + value for x in self.arr]
+
+    def multiply(self, value):
+        # Функция умножения каждого элемента массива на указанное значение
+        self.arr = [x * value for x in self.arr]
+
+    def subtract(self, value):
+        # Функция вычитания указанного значения из каждого элемента массива
+        self.arr = [x - value for x in self.arr]
+
+    def __gt__(self, other):
+        # Метод сравнения "больше", сравнивающий сумму элементов текущего вектора с суммой элементов другого вектора
+        return sum(self.arr) > sum(other.arr)
+
+    def __lt__(self, other):
+        # Метод сравнения "меньше", сравнивающий сумму элементов текущего вектора с суммой элементов другого вектора
+        return sum(self.arr) < sum(other.arr)
+
+    def __eq__(self, other):
+        # Метод сравнения "равно", сравнивающий сумму элементов текущего вектора с суммой элементов другого вектора
+        return sum(self.arr) == sum(other.arr)
+
+    @staticmethod
+    def count_objects():
+        # Статический метод для подсчета числа объектов типа Vector
+        return Vector.count
+
+
+# Проверка работы класса
+vector1 = Vector(5, 1)
+vector2 = Vector()
+vector1.print()  # Output: [1, 1, 1, 1, 1]
+vector2.print()  # Output: [0]
+vector1.add(3)
+vector1.print()  # Output: [4, 4, 4, 4, 4]
+print(vector1 > vector2)  # Output: True (сумма элементов вектора 1 больше с  
