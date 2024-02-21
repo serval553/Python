@@ -1,0 +1,111 @@
+class Matrix:
+    def __init__(self, rows=None, cols=None):
+        # Инициализация размеров матрицы и данных
+        self.rows = rows
+        self.cols = cols
+        self.data = [[0 for _ in range(cols)] for _ in range(rows)] if rows and cols else None
+
+    def __del__(self):
+        # Удаление данных при уничтожении объекта
+        del self.data
+
+    def set_value(self, i, j, value):
+        # Установка значения элемента (i, j)
+        if 0 <= i < self.rows and 0 <= j < self.cols:
+            self.data[i][j] = value
+        else:
+            raise IndexError('Индекс вне диапазона')
+
+    def get_value(self, i, j):
+        # Получение значения элемента (i, j)
+        if 0 <= i < self.rows and 0 <= j < self.cols:
+            return self.data[i][j]
+        else:
+            raise IndexError('Индекс вне диапазона')
+
+    def print_matrix(self):
+        # Функция для печати матрицы
+        for row in self.data:
+            print(row)
+
+    def add_matrix(self, other):
+        # Функция сложения матриц
+        if self.rows == other.rows and self.cols == other.cols:
+            # Проверка совпадения размеров матриц для сложения
+            result = Matrix(self.rows, self.cols)
+            for i in range(self.rows):
+                for j in range(self.cols):
+                    result.data[i][j] = self.data[i][j] + other.data[i][j]
+            return result
+        else:
+            raise ValueError('Размеры матрицы не совпадают для сложения')
+
+    def subtract_matrix(self, other):
+        # Функция вычитания матриц
+        if self.rows == other.rows and self.cols == other.cols:
+            # Проверка совпадения размеров матриц для вычитания
+            result = Matrix(self.rows, self.cols)
+            for i in range(self.rows):
+                for j in range(self.cols):
+                    result.data[i][j] = self.data[i][j] - other.data[i][j]
+            return result
+        else:
+            raise ValueError('Размеры матрицы не совпадают для вычитания')
+
+    def multiply_matrix(self, other):
+        # Функция умножения матриц
+        if self.cols != other.rows:
+            # Проверка совместимости размеров для умножения
+            raise ValueError('Размеры матрицы несовместимы для умножения')
+        result = Matrix(self.rows, other.cols)
+        for i in range(self.rows):
+            for j in range(other.cols):
+                for k in range(self.cols):
+                    result.data[i][j] += self.data[i][k] * other.data[k][j]
+        return result
+
+    def multiply_by_scalar(self, scalar):
+        # Функция умножения матрицы на число
+        result = Matrix(self.rows, self.cols)
+        for i in range(self.rows):
+            for j in range(self.cols):
+                result.data[i][j] = self.data[i][j] * scalar
+        return result
+
+# Пример использования
+# Создание матриц и операции с ними
+matrix1 = Matrix(2, 3)
+matrix1.set_value(0, 0, 1)
+matrix1.set_value(0, 1, 2)
+matrix1.set_value(0, 2, 3)
+matrix1.set_value(1, 0, 4)
+matrix1.set_value(1, 1, 5)
+matrix1.set_value(1, 2, 6)
+
+matrix2 = Matrix(2, 3)
+matrix2.set_value(0, 0, 7)
+matrix2.set_value(0, 1, 8)
+matrix2.set_value(0, 2, 9)
+matrix2.set_value(1, 0, 10)
+matrix2.set_value(1, 1, 11)
+matrix2.set_value(1, 2, 12)
+
+print("Матрица 1:")
+matrix1.print_matrix()
+print("Матрица 2:")
+matrix2.print_matrix()
+
+# Сложение матриц
+sum_matrix = matrix1.add_matrix(matrix2)
+print("Сумма матриц:")
+sum_matrix.print_matrix()
+
+# Вычитание матриц
+diff_matrix = matrix1.subtract_matrix(matrix2)
+print("Разность матриц:")
+diff_matrix.print_matrix()
+
+# Умножение матриц
+product_matrix = matrix1.multiply_matrix(matrix2)
+print("Произведение матриц:")
+product_matrix.print  
