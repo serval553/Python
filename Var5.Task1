@@ -73,4 +73,4 @@ vector1.print()  # Output: [1, 1, 1, 1, 1]
 vector2.print()  # Output: [0]
 vector1.add(3)
 vector1.print()  # Output: [4, 4, 4, 4, 4]
-print(vector1 > vector2)  # Output: True (сумма элементов вектора 1 больше с  
+print(vector1 > vector2)
