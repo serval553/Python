@@ -1,0 +1,36 @@
+class TuringMachine:
+   def__init__(self, tape, initial_state, transition_function, accepting_states):
+       # Инициализация машины Тьюринга с заданными параметрами
+       self.tape = tape  # Лента машины Тьюринга
+       self.head_position = 0  # Позиция головки на ленте
+       self.state = initial_state  # Начальное состояние
+       self.transition_function = transition_function  # Функция перехода
+       self.accepting_states = accepting_states  # Состояния, в которых машина принимает вход
+
+   def step(self):
+       # Один шаг выполнения машины Тьюринга
+       current_symbol = self.tape[self.head_position]  # Получение текущего символа под головкой
+       new_state, new_symbol, move = self.transition_function[(self.state, current_symbol)]  # Получение правила перехода
+       # Обновление состояния, символа на ленте и позиции головки
+       self.state = new_state
+       self.tape[self.head_position] = new_symbol
+       if move == 'R':  # Движение головки вправо
+           self.head_position += 1
+       elif move == 'L':  # Движение головки влево
+           self.head_position -= 1
+
+   def run(self):
+       # Запуск машины Тьюринга до достижения принимающего состояния
+       while self.state not in self.accepting_states:
+           self.step()
+
+# Пример использования
+initial_tape = ['0', '1', '0', '', '0']  # Начальное состояние ленты
+initial_state = 'q0'  # Начальное состояние машины
+transition_function = {('q0', '0'): ('q1', '1', 'R'), ('q1', '1'): ('q0', '0', 'R')}  # Функция перехода
+accepting_states = ['q0']  # Принимающие состояния
+
+tm = TuringMachine(initial_tape, initial_state, transition_function, accepting_states)  # Создание машины Тьюринга
+tm.run()  # Запуск машины
+
+print(tm.tape)  # Вывод состояния ленты после работы машины
