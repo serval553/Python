@@ -1,0 +1,101 @@
+# Родительский класс Student
+class Student:
+   def __init__(self, name, course, student_id):
+       # Конструктор для инициализации объекта Student
+       self.name = name
+       self.course = course
+       self.student_id = student_id
+
+   def __del__(self):
+       # Деструктор для освобождения ресурсов
+       print(f"Студент {self.name} был удален.")
+
+   def assign_course(self, new_course):
+       # Метод для назначения нового курса студенту
+       self.course = new_course
+
+   def display_info(self):
+       # Метод для отображения информации о студенте
+       return f"Имя: {self.name}, Курс: {self.course}, ID студента: {self.student_id}"
+
+
+class Graduate(Student):
+   def __init__(self, name, course, student_id, diploma_topic):
+       super().__init__(name, course, student_id)
+       self.diploma_topic = diploma_topic
+
+   def set_dipl_topic(self, topic):
+       # Метод для назначения темы диплома
+       self.diploma_topic = topic
+
+   def display(self):
+       # Метод для отображения информации о студенте-дипломнике
+       return f"Имя: {self.name}, Курс: {self.course}, ID студента: {self.student_id}, Тема диплома: {self.diploma_topic}"
+
+
+class SophomoreStudent(Student):
+   def __init__(self, name, course, student_id, debt):
+       super().__init__(name, course, student_id)
+       self.debt = debt
+
+   def set_debt(self, amount):
+       # Метод для установки долга
+       self.debt = amount
+
+   def cancel_debt(self):
+       # Метод для аннулирования долга
+       self.debt = 0
+
+   def reduce_course(self):
+       # Метод для понижения курса при наличии долга
+       if self.debt > 0:
+           self.course -= 1
+
+   def display_info(self):  # Переопределение метода родительского класса
+       # Переопределенный метод для отображения информации о студенте-должнике
+       return f"Имя: {self.name}, Курс: {self.course}, ID студента: {self.student_id}, Задолженность: {self.debt}"
+
+# Пример использования и демонстрация методов
+def main_menu():
+   print("1. Создать нового студента")
+   print("2. Изменить статус студента")
+   print("3. Отобразить информацию о студенте")
+   choice = input("Введите ваш выбор: ")
+   return choice
+
+def create_student():
+   name = input("Введите имя студента: ")
+   course = int(input("Введите курс: "))
+   student_id = int(input("Введите ID студента: "))
+   return Student(name, course, student_id)
+
+def upgrade_status(student):
+   if student.course == 4:
+       diploma_topic = input("Укажите тему диплома: ")
+       return Graduate(student.name, student.course, student.student_id, diploma_topic)  # Полиморфизм: разные типы объектов могут использоваться вместо базового объекта Student
+       print("Студент повышен до выпускника")
+   elif student.course < 4:
+       debt = int(input("Укажите задолженность студента: "))
+       return SophomoreStudent(student.name, student.course, student.student_id, debt)  # Полиморфизм: возвращение различных подтипов Student в зависимости от условий
+       print("Статус студента изменен на должника")
+   else:
+       return student
+
+def display_info(student):
+   print(student.display_info())  # Полиморфизм: использование метода display_info() у разных подтипов студентов в едином контексте
+
+# Главная часть программы
+student = None
+while True:
+   choice = main_menu()
+
+   if choice == "1":
+       student = create_student()
+   elif choice == "2":
+       if student is not None:
+           student = upgrade_status(student)
+   elif choice == "3":
+       if student is not None:
+           display_info(student)
+   else:
+       print("Неверный выбор")
