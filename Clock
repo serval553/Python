@@ -1,0 +1,49 @@
+#Реализовать программу Аналоговые часы на любом языке программирования
+import tkinter as tk
+import math
+import time
+
+def create_clock():
+    root = tk.Tk()
+    root.title("Analog Clock")
+
+    canvas = tk.Canvas(root, width=400, height=400, bg='white')
+    canvas.pack()
+
+    def draw_clock():
+        canvas.delete('all')
+        current_time = time.localtime()
+        second = current_time.tm_sec
+        minute = current_time.tm_min
+        hour = current_time.tm_hour
+        if hour >= 12:
+            hour -= 12
+
+        # Рисуем циферблат
+        canvas.create_oval(50, 50, 350, 350, width=2)
+        for i in range(12):
+            x = 200 + 150 * math.cos(math.radians(i * 30 - 90))
+            y = 200 + 150 * math.sin(math.radians(i * 30 - 90))
+            canvas.create_text(x, y, text=str(i+1), font=('Arial', 12, 'bold'))
+
+        # Рисуем циферблатные стрелки
+        second_x = 200 + 120 * math.cos(math.radians(second * 6 - 90))
+        second_y = 200 + 120 * math.sin(math.radians(second * 6 - 90))
+        canvas.create_line(200, 200, second_x, second_y, width=1, fill='red')
+        
+        minute_x = 200 + 100 * math.cos(math.radians(minute * 6 - 90))
+        minute_y = 200 + 100 * math.sin(math.radians(minute * 6 - 90))
+        canvas.create_line(200, 200, minute_x, minute_y, width=3, fill='blue')
+
+        hour_x = 200 + 80 * math.cos(math.radians((hour*30) + (minute/2) - 90))
+        hour_y = 200 + 80 * math.sin(math.radians((hour*30) + (minute/2) - 90))
+        canvas.create_line(200, 200, hour_x, hour_y, width=5, fill='black')
+
+        canvas.create_oval(198, 198, 202, 202, fill='black')
+
+        root.after(1000, draw_clock)
+
+    draw_clock()
+    root.mainloop()
+
+create_clock()
