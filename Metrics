@@ -1,0 +1,131 @@
+import random
+import heapq
+import time
+
+class BellmanFord:
+    def __init__(self, vertices):
+        self.V = vertices  # Количество вершин
+        self.graph = []  # Список рёбер графа
+
+    def add_edge(self, u, v, w):
+        """Добавление рёбер в граф."""
+        self.graph.append((u, v, w))
+
+    def shortest_path(self, src):
+        """Метод для вычисления кратчайших путей от источника с помощью алгоритма Беллмана-Форда."""
+        distance = [float("Inf")] * self.V  # Инициализация расстояний до всех вершин
+        distance[src] = 0  # Расстояние до начальной вершины равно 0
+        predecessor = [None] * self.V  # Список предшественников для восстановления пути
+
+        # Основной цикл алгоритма
+        for _ in range(self.V - 1):
+            for u, v, w in self.graph:
+                # Если можно улучшить расстояние до вершины v
+                if distance[u] != float("Inf") and distance[u] + w < distance[v]:
+                    distance[v] = distance[u] + w  # Обновление расстояния
+                    predecessor[v] = u  # Обновление предшественника
+
+        return distance, predecessor
+
+    def get_path(self, predecessor, target):
+        """Восстановление кратчайшего пути от начальной до целевой вершины."""
+        path = []
+        while target is not None:
+            path.append(target)
+            target = predecessor[target]
+        return path[::-1]  # Путь возвращается в обратном порядке
+
+
+class Dijkstra:
+    def __init__(self, vertices):
+        self.V = vertices  # Количество вершин
+        self.graph = {i: [] for i in range(vertices)}  # Граф в виде словаря смежности
+
+    def add_edge(self, u, v, w):
+        """Добавление рёбер в граф."""
+        self.graph[u].append((v, w))  # Добавление ориентированного ребра
+        self.graph[v].append((u, w))  # Если граф не ориентированный, добавляем обратное ребро
+
+    def shortest_path(self, src):
+        """Метод для вычисления кратчайших путей от источника с помощью алгоритма Дейкстры."""
+        distance = {i: float("Inf") for i in range(self.V)}  # Инициализация расстояний
+        distance[src] = 0  # Расстояние до начальной вершины равно 0
+        priority_queue = [(0, src)]  # Очередь с приоритетом для хранения вершин
+        predecessor = [None] * self.V  # Список предшественников
+
+        while priority_queue:
+            current_distance, u = heapq.heappop(priority_queue)  # Извлечение вершины с минимальным расстоянием
+
+            for v, w in self.graph[u]:
+                # Если найдено лучшее расстояние до вершины v
+                if current_distance + w < distance[v]:
+                    distance[v] = current_distance + w  # Обновление расстояния
+                    predecessor[v] = u  # Обновление предшественника
+                    heapq.heappush(priority_queue, (distance[v], v))  # Добавление в очередь
+
+        return distance, predecessor
+
+    def get_path(self, predecessor, target):
+        """Восстановление кратчайшего пути от начальной до целевой вершины."""
+        path = []
+        while target is not None:
+            path.append(target)
+            target = predecessor[target]
+        return path[::-1]  # Путь возвращается в обратном порядке
+
+
+def create_graph(num_vertices, num_edges):
+    """Создание графа с заданным количеством вершин и рёбер."""
+    graph = []
+    for _ in range(num_edges):
+        u = random.randint(0, num_vertices - 1)  # Случайная начальная вершина
+        v = random.randint(0, num_vertices - 1)  # Случайная конечная вершина
+        w = random.randint(1, 10)  # Случайный положительный вес ребра
+        graph.append((u, v, w))  # Добавление ребра в граф
+    return graph
+
+def test_algorithms(num_vertices, num_edges):
+    """Тестирование алгоритмов на сгенерированном графе."""
+    edges = create_graph(num_vertices, num_edges)  # Генерация случайного графа
+    
+    # Тестирование алгоритма Беллмана-Форда
+    bf = BellmanFord(num_vertices)
+    for u, v, w in edges:
+        bf.add_edge(u, v, w)  # Добавление рёбер в граф
+
+    start_time = time.time()  # Запись времени начала
+    bf_distances, bf_predecessors = bf.shortest_path(0)  # Вычисление кратчайших путей
+    bf_duration = time.time() - start_time  # Время выполнения алгоритма
+    print(f"Bellman-Ford Duration: {bf_duration:.6f} seconds")  # Вывод времени выполнения
+    
+    # Тестирование алгоритма Дейкстры
+    dijkstra = Dijkstra(num_vertices)
+    for u, v, w in edges:
+        dijkstra.add_edge(u, v, w)  # Добавление рёбер в граф
+
+    start_time = time.time()  # Запись времени начала
+    dijkstra_distances, dijkstra_predecessors = dijkstra.shortest_path(0)  # Вычисление кратчайших путей
+    dijkstra_duration = time.time() - start_time  # Время выполнения алгоритма
+    print(f"Dijkstra Duration: {dijkstra_duration:.6f} seconds")  # Вывод времени выполнения
+
+    # Случайная цель для тестирования кратчайшего пути
+    target_vertex = random.randint(1, num_vertices - 1)
+    # Вывод кратчайших путей для обоих алгоритмов
+    print(f"Shortest path from 0 to {target_vertex} (Bellman-Ford): {bf.get_path(bf_predecessors, target_vertex)}")
+    print(f"Shortest path from 0 to {target_vertex} (Dijkstra): {dijkstra.get_path(dijkstra_predecessors, target_vertex)}")
+
+    # Сравнение эффективности
+    if bf_duration < dijkstra_duration:
+        print("Алгоритм Беллмана-Форда был быстрее для этой задачи.")
+    elif bfs_duration > dijkstra_duration:
+        print("Алгоритм Дейкстры был быстрее для этой задачи.")
+    else:
+        print("Оба алгоритма работали одинаково быстро.")
+
+if __name__ == "__main__":
+    num_vertices = int(input("Введите количество вершин (больше 100): "))  # Ввод количества вершин пользователем
+    num_edges = int(input("Введите количество рёбер: "))  # Ввод количества рёбер пользователем
+    if num_vertices > 100:
+        test_algorithms(num_vertices, num_edges)  # Запуск тестирования
+    else:
+        print("Количество вершин должно быть больше 100.")  # Проверка условия на количество вершин
