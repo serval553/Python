@@ -2,6 +2,7 @@ import email
 from email import policy
 from email.parser import BytesParser
 import dns.resolver
+import extract_msg
 
 def get_mx_records(domain):
     try:
@@ -13,48 +14,42 @@ def get_mx_records(domain):
         print(f"Ошибка при получении MX-записей для {domain}: {e}")
         return None
 
-def parse_email_headers(email_file):
-    # Открываем файл с письмом
-    with open(email_file, 'rb') as f:
-        # Читаем и парсим письмо
-        msg = BytesParser(policy=policy.default).parse(f)
-
-    # Извлекаем заголовки
-    headers = {
-        'From': msg['From'],
-        'To': msg['To'],
-        'Subject': msg['Subject'],
-        'Date': msg['Date'],
-        'Message-ID': msg['Message-ID'],
-        'Return-Path': msg['Return-Path'],
-        'DKIM': msg.get('DKIM-Signature'),
-        'Received-SPF': msg.get('Received-SPF'),
-        'DMARC': msg.get('Authentication-Results'),
-        'Received': msg.get_all('Received'),
-        'Authentication-Results': msg.get('Authentication-Results'),
-    }
+def parse_email_headers(msg_file):
+    if msg_file.endswith('.msg'):
+        # Извлечение данных из .msg файла
+        msg = extract_msg.Message(msg_file)
+        headers = {
+            'From': msg.sender,
+            'To': msg.to,
+            'Subject': msg.subject,
+            'Date': msg.date,
+            'Message-ID': msg.message_id,
+            'Return-Path': msg.return_path,
+            'Received': msg.received,
+        }
+    else:
+        # Открываем файл с письмом в формате .eml
+        with open(msg_file, 'rb') as f:
+            msg = BytesParser(policy=policy.default).parse(f)
+            headers = {
+                'From': msg['From'],
+                'To': msg['To'],
+                'Subject': msg['Subject'],
+                'Date': msg['Date'],
+                'Message-ID': msg['Message-ID'],
+                'Return-Path': msg['Return-Path'],
+                'Received': msg.get_all('Received'),
+            }
 
     # Извлекаем информацию о 'Received: from'
     received_from = []
-    for received in headers['Received']:
-        if 'from' in received:
-            domain = received.split('from ')[1].split(' ')[0]
-            received_from.append(domain)
+    if headers.get('Received'):
+        for received in headers['Received']:
+            if 'from' in received:
+                domain = received.split('from ')[1].split(' ')[0]
+                received_from.append(domain)
 
-            # Получение MX-записей для домена
-            mx_records = get_mx_records(domain)
-            if mx_records:
-                print(f"MX-записи для домена '{domain}': {', '.join(mx_records)}")
-            else:
-                print(f"MX-записи для домена '{domain}' не найдены.")
-
-    headers['Received: from'] = received_from
-
-    return headers
-
-# Пример использования
-if __name__ == "__main__":
-    email_file_path = 'mail.eml'  # Укажите путь к файлу с письмом
-    headers = parse_email_headers(email_file_path)
-    for key, value in headers.items():
-        print(f"{key}: {value}")
+                # Получение MX-записей для домена
+                mx_records = get_mx_records(domain)
+                if mx_records:
+                    print(f"MX-записи для домена '{domain}': {', 
