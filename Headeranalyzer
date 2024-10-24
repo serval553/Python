@@ -52,4 +52,17 @@ def parse_email_headers(msg_file):
                 # Получение MX-записей для домена
                 mx_records = get_mx_records(domain)
                 if mx_records:
-                    print(f"MX-записи для домена '{domain}': {', 
+                    print(f"MX-записи для домена '{domain}': {', '.join(mx_records)}")
+                else:
+                    print(f"MX-записи для домена '{domain}' не найдены.")
+
+    headers['Received: from'] = received_from
+
+    return headers
+
+# Пример использования
+if __name__ == "__main__":
+    email_file_path = 'path/to/your/email.msg'  # Укажите путь к файлу .msg
+    headers = parse_email_headers(email_file_path)
+    for key, value in headers.items():
+        print(f"{key}: {value}")
