@@ -100,3 +100,47 @@ for filepath in "$DIRECTORY"/*; do
 done
 
 
+
+
+#!/bin/bash
+
+# Укажите путь к директории (на один уровень ниже)
+DIRECTORY="../sha256"  # Директория, где находятся файлы для проверки
+HASH_FILE="$(dirname "$0")/hashes.txt" # Файл с хэшами в той же директории, что и скрипт
+
+# Проверяем, существует ли файл с хэшами
+if [ ! -f "$HASH_FILE" ]; then
+    echo "Файл с хэшами не найден: $HASH_FILE"
+    exit 1
+fi
+
+# Читаем файл с хэшами в массив
+mapfile -t expected_hashes < "$HASH_FILE"
+
+# Создаем ассоциативный массив для хранения найденных хэшей и их имен
+declare -A found_hashes
+
+# Проходим по всем файлам в директории
+for filepath in "$DIRECTORY"/*; do
+    # Проверяем, что это файл (не директория)
+    if [ -f "$filepath" ]; then
+        filename=$(basename "$filepath")
+        # Вычисляем хэш для файла
+        actual_hash=$(sha256sum "$filepath" | awk '{ print $1 }')
+
+        # Сохраняем хэш и имя файла в ассоциативный массив
+        found_hashes["$actual_hash"]="$filename"
+    fi
+done
+
+# Сравниваем каждый хэш из файла с хэшами в директории
+for expected_hash in "${expected_hashes[@]}"; do
+    if [[ -n "${found_hashes[$expected_hash]}" ]]; then
+        echo "Хэш $expected_hash совпадает с файлом: ${found_hashes[$expected_hash]}"
+    else
+        echo "Хэш $expected_hash не найден в директории."
+    fi
+done
+
+
+
