@@ -54,3 +54,42 @@ if __name__ == "__main__":
     # Выводим результаты
     for filename, result in comparison_results.items():
         print(f"{filename}: {result}")
+
+
+
+
+
+
+
+
+
+#!/bin/bash
+
+# Укажите путь к директории и файлу с хэшами
+DIRECTORY="path/to/your/directory"   # Путь к вашей директории
+HASH_FILE="path/to/your/hash_file.txt" # Путь к файлу с хэшами
+
+# Проверяем, существует ли файл с хэшами
+if [ ! -f "$HASH_FILE" ]; then
+    echo "Файл с хэшами не найден: $HASH_FILE"
+    exit 1
+fi
+
+# Читаем файл с хэшами построчно
+while IFS=' ' read -r expected_hash filename; do
+    # Проверяем, существует ли файл
+    if [ -f "$DIRECTORY/$filename" ]; then
+        # Вычисляем хэш для файла
+        actual_hash=$(sha256sum "$DIRECTORY/$filename" | awk '{ print $1 }')
+        
+        # Сравниваем хэши
+        if [ "$actual_hash" == "$expected_hash" ]; then
+            echo "$filename: Хэш совпадает."
+        else
+            echo "$filename: Хэш не совпадает."
+        fi
+    else
+        echo "$filename: Файл не найден в директории."
+    fi
+done < "$HASH_FILE"
+
