@@ -3,13 +3,14 @@ from email import policy
 from email.parser import BytesParser
 import dns.resolver
 import extract_msg
+import os
 
 def get_mx_records(domain):
     try:
         mx_records = dns.resolver.resolve(domain, 'MX')
         return [str(record.exchange) for record in mx_records]
     except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN):
-        return None  # MX-записи не найдены
+        return None  # MX-записи не найдены.
     except Exception as e:
         print(f"Ошибка при получении MX-записей для {domain}: {e}")
         return None
@@ -18,7 +19,7 @@ def parse_email_headers(msg_file):
     headers = {}
 
     if msg_file.lower().endswith('.msg'):
-        # Извлечение данных из .msg файла
+        # Извлечение данных из .msg файла.
         msg = extract_msg.Message(msg_file)
         headers = {
             'From': msg.sender,
@@ -28,9 +29,10 @@ def parse_email_headers(msg_file):
             'Message-ID': msg.message_id,
             'Return-Path': msg.return_path,
             'Received': msg.received,
+            'Body': msg.body,  # Тело письма
         }
     elif msg_file.lower().endswith('.eml'):
-        # Открываем файл с письмом в формате .eml
+        # Открываем файл с письмом в формате .eml.
         with open(msg_file, 'rb') as f:
             msg = BytesParser(policy=policy.default).parse(f)
             headers = {
@@ -41,6 +43,7 @@ def parse_email_headers(msg_file):
                 'Message-ID': msg['Message-ID'],
                 'Return-Path': msg['Return-Path'],
                 'Received': msg.get_all('Received'),
+                'Body': msg.get_body(preferencelist=('plain')).get_content(),  # Тело письма
             }
     else:
         print("Неподдерживаемый формат файла.")
@@ -63,11 +66,38 @@ def parse_email_headers(msg_file):
     headers['Received: from'] = received_from
     return headers
 
+def convert_msg_to_eml(msg_file, eml_file):
+    # Парсим заголовки и тело письма
+    headers = parse_email_headers(msg_file)
+    
+    if headers is None:
+        print("Ошибка при парсинге письма.")
+        return
+
+    # Формируем содержимое для .eml файла
+    eml_content = f"From: {headers['From']}\n"
+    eml_content += f"To: {headers['To']}\n"
+    eml_content += f"Subject: {headers['Subject']}\n"
+    eml_content += f"Date: {headers['Date']}\n"
+    eml_content += f"Message-ID: {headers['Message-ID']}\n"
+    eml_content += f"Return-Path: {headers['Return-Path']}\n"
+
+    if headers.get('Received'):
+        for received in headers['Received']:
+            eml_content += f"Received: {received}\n"
+
+    eml_content += "\n"  # Пустая строка перед телом
+    eml_content += headers['Body']  # Добавляем тело письма
+
+    # Записываем содержимое в .eml файл
+    with open(eml_file, 'w', encoding='utf-8') as f:
+        f.write(eml_content)
+
+    print(f"Файл .eml успешно создан: {eml_file}")
+
 # Пример использования
 if __name__ == "__main__":
-    email_file_path = 'path/to/your/email.msg'  # Укажите путь к файлу .msg или .eml
-    headers = parse_email_headers(email_file_path)
+    email_file_path = 'path/to/your/email.msg'  # Укажите путь к вашему .msg файлу
+    eml_file_path = 'path/to/your/email.eml'  # Укажите путь для сохранения .eml файла
 
-    if headers:
-        for key, value in headers.items():
-            print(f"{key}: {value}")
+    convert_msg_to_eml(email_file_path, eml_file_path)
