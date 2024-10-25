@@ -101,3 +101,54 @@ if __name__ == "__main__":
     eml_file_path = 'path/to/your/email.eml'  # Укажите путь для сохранения .eml файла
 
     convert_msg_to_eml(email_file_path, eml_file_path)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def extract_fields_from_txt(txt_file):
+    headers = {}
+    with open(txt_file, 'r', encoding='utf-8') as f:
+        # Читаем все строки из файла
+        lines = f.readlines()
+
+    # Обрабатываем строки
+    for line in lines:
+        # Ищем заголовки
+        if line.startswith("From:"):
+            headers['From'] = line[len("From:"):].strip()
+        elif line.startswith("To:"):
+            headers['To'] = line[len("To:"):].strip()
+        elif line.startswith("Subject:"):
+            headers['Subject'] = line[len("Subject:"):].strip()
+        elif line.startswith("Date:"):
+            headers['Date'] = line[len("Date:"):].strip()
+        elif line.startswith("Message-ID:"):
+            headers['Message-ID'] = line[len("Message-ID:"):].strip()
+        elif line.startswith("Return-Path:"):
+            headers['Return-Path'] = line[len("Return-Path:"):].strip()
+
+    return headers
+
+if __name__ == "__main__":
+    txt_file_path = 'path/to/your/email.txt'  # Укажите путь к вашему .txt файлу
+    headers = extract_fields_from_txt(txt_file_path)
+
+    # Печать результатов
+    print(f"From: {headers.get('From', 'Not found')}")
+    print(f"To: {headers.get('To', 'Not found')}")
+    print(f"Subject: {headers.get('Subject', 'Not found')}")
+    print(f"Date: {headers.get('Date', 'Not found')}")
+    print(f"Message-ID: {headers.get('Message-ID', 'Not found')}")
+    print(f"Return-Path: {headers.get('Return-Path', 'Not found')}")
+
