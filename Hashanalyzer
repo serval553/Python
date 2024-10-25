@@ -62,12 +62,11 @@ if __name__ == "__main__":
 
 
 
-
 #!/bin/bash
 
-# Укажите путь к директории и файлу с хэшами
-DIRECTORY="path/to/your/directory"   # Путь к вашей директории
-HASH_FILE="path/to/your/hash_file.txt" # Путь к файлу с хэшами
+# Укажите путь к директории (что-то вроде текущей директории)
+DIRECTORY="$(dirname "$0")"  # Текущая директория, где расположен скрипт
+HASH_FILE="$DIRECTORY/hash_file.txt" # Файл с хэшами в той же директории
 
 # Проверяем, существует ли файл с хэшами
 if [ ! -f "$HASH_FILE" ]; then
@@ -75,21 +74,29 @@ if [ ! -f "$HASH_FILE" ]; then
     exit 1
 fi
 
-# Читаем файл с хэшами построчно
-while IFS=' ' read -r expected_hash filename; do
-    # Проверяем, существует ли файл
-    if [ -f "$DIRECTORY/$filename" ]; then
+# Читаем файл с хэшами в массив
+mapfile -t expected_hashes < "$HASH_FILE"
+
+# Переменная для отслеживания индекса
+index=0
+
+# Проходим по всем файлам в директории
+for filepath in "$DIRECTORY"/*; do
+    # Проверяем, что это файл (не директория)
+    if [ -f "$filepath" ]; then
+        filename=$(basename "$filepath")
         # Вычисляем хэш для файла
-        actual_hash=$(sha256sum "$DIRECTORY/$filename" | awk '{ print $1 }')
+        actual_hash=$(sha256sum "$filepath" | awk '{ print $1 }')
         
-        # Сравниваем хэши
-        if [ "$actual_hash" == "$expected_hash" ]; then
+        # Сравниваем ш hashes
+        if [ "$actual_hash" == "${expected_hashes[index]}" ]; then
             echo "$filename: Хэш совпадает."
         else
             echo "$filename: Хэш не совпадает."
         fi
-    else
-        echo "$filename: Файл не найден в директории."
+        
+        index=$((index + 1))  # Увеличиваем индекс на 1
     fi
-done < "$HASH_FILE"
+done
+
 
