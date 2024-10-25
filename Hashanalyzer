@@ -1,0 +1,56 @@
+import os
+import hashlib
+
+def calculate_file_hash(file_path):
+    """Вычисляет SHA-256 хэш файла."""
+    sha256_hash = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        # Читаем файл по частям
+        for byte_block in iter(lambda: f.read(4096), b""):
+            sha256_hash.update(byte_block)
+    return sha256_hash.hexdigest()
+
+def load_hashes(hash_file_path):
+    """Загружает хэши из текстового файла в словарь."""
+    hashes = {}
+    with open(hash_file_path, 'r') as hash_file:
+        for line in hash_file:
+            line = line.strip()
+            if line:  # игнорировать пустые строки
+                # Делим строку на файл и хэш
+                parts = line.split()
+                if len(parts) == 2:
+                    filename, file_hash = parts
+                    hashes[filename] = file_hash
+    return hashes
+
+def compare_hashes(directory, hash_file_path):
+    """Сравнивает хэши всех файлов в директории с хэшами из файла."""
+    file_hashes = load_hashes(hash_file_path)
+    results = {}
+    
+    for filename, expected_hash in file_hashes.items():
+        file_path = os.path.join(directory, filename)
+        if os.path.exists(file_path):
+            # Вычисляем хэш файла
+            actual_hash = calculate_file_hash(file_path)
+            # Сравниваем хэши
+            if actual_hash == expected_hash:
+                results[filename] = "Хэш совпадает."
+            else:
+                results[filename] = "Хэш не совпадает."
+        else:
+            results[filename] = "Файл не найден."
+
+    return results
+
+# Пример использования
+if __name__ == "__main__":
+    directory = 'path/to/your/directory'  # Укажите путь к вашей директории
+    hash_file_path = 'path/to/your/hash_file.txt'  # Укажите путь к файлу с хэшами
+
+    comparison_results = compare_hashes(directory, hash_file_path)
+
+    # Выводим результаты
+    for filename, result in comparison_results.items():
+        print(f"{filename}: {result}")
