@@ -1,0 +1,107 @@
+# Класс Book представляет книгу
+class Book:
+    def __init__(self, title, author):
+        self.title = title
+        self.author = author
+
+# Фабрика книг
+class BookFactory:
+    @staticmethod
+    def create_book(title, author):
+        return Book(title, author)
+
+# Одиночка для управления библиотекой
+class LibraryInstance:
+    _instance = None
+
+    @staticmethod
+    def get_instance():
+        if LibraryInstance._instance is None:
+            LibraryInstance._instance = Library()
+        return LibraryInstance._instance
+
+class Library:
+    def __init__(self):
+        self.books = []
+        self.observers = []
+
+    def add_book(self, book):
+        self.books.append(book)
+        self.notify_observers()
+
+    def remove_book(self, title):
+        self.books = [book for book in self.books if book.title != title]
+        self.notify_observers()
+
+    def search_book(self, title):
+        return next((book for book in self.books if book.title == title), None)
+
+    def add_observer(self, observer):
+        self.observers.append(observer)
+
+    def notify_observers(self):
+        for observer in self.observers:
+            observer.update(self.books)
+
+# Наблюдатель для уведомления о событиях
+class Observer:
+    def update(self, books):
+        raise NotImplementedError
+
+class NotificationService(Observer):
+    def update(self, books):
+        print(f"\nОбновленный список книг: {[book.title for book in books]}")
+
+# Основная функция для интерактивного взаимодействия
+def main():
+    library = LibraryInstance.get_instance()
+    notifier = NotificationService()
+    library.add_observer(notifier)
+
+    while True:
+        print("\nВыберите действие:")
+        print("1. Добавить книгу")
+        print("2. Удалить книгу")
+        print("3. Найти книгу")
+        print("4. Показать все книги")
+        print("5. Выход")
+
+        choice = input("Введите номер действия: ")
+
+        if choice == "1":
+            title = input("Введите название книги: ")
+            author = input("Введите автора книги: ")
+            book = BookFactory.create_book(title, author)
+            library.add_book(book)
+            print(f"Книга '{title}' добавлена.")
+        
+        elif choice == "2":
+            title = input("Введите название книги для удаления: ")
+            library.remove_book(title)
+            print(f"Книга '{title}' удалена.")
+        
+        elif choice == "3":
+            title = input("Введите название книги для поиска: ")
+            found_book = library.search_book(title)
+            if found_book:
+                print(f"Найдена книга: {found_book.title} автор: {found_book.author}")
+            else:
+                print("Книга не найдена.")
+        
+        elif choice == "4":
+            print("Список всех книг в библиотеке:")
+            if not library.books:
+                print("Книги отсутствуют.")
+            else:
+                for book in library.books:
+                    print(f"- {book.title} автор: {book.author}")
+
+        elif choice == "5":
+            print("Выход из программы.")
+            break
+
+        else:
+            print("Некорректный ввод. Пожалуйста, попробуйте снова.")
+
+if __name__ == "__main__":
+    main()
